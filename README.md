@@ -97,12 +97,11 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-Developed by [@yourAmok](https://github.com/yourAmok) 
->Note!
->[@Hotmountain](https://github.com/Hotmountain) was my main account before I got locked out of it. [@yourAmok](https://github.com/yourAmok) is my new account.*
+Developed by [@thatAmok](https://github.com/thatAmok)
 
-> Note!
-> Please contact me for any bugs or unusual behaviour: kerogergesazmy@gmail.com
+> Note! [@yourAmok](https://github.com/yourAmok) & [@Hotmountain](https://github.com/Hotmountain) were my main accounts before I got locked out of them, [@thatAmok](https://github.com/thatAmok) is my current one.
+
+> Please contact me for any bugs or unusual behaviour: newtongigabye@gmail.com
 
 ---
 
@@ -127,4 +126,5 @@ Organizicate is in beta. Please back up important files before using.
 
 ## 💸 100% Free & Open-Source
 
-Organizicate is **completely free forever** and open source. There are no hidden fees, subscriptions, or paid features—ever. Enjoy and share!
+This is **completely free forever** and open source, with it you are able to use, modify, and share it. —  but may not be used for harmful, unethical, or malicious purposes.  
+You must also credit the original developer [@thatAmok](https://github.com/thatAmok) (me!)
