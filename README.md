@@ -1,6 +1,6 @@
-# Organizicate (Beta v0.9.6)
+# Organizicate (Beta v0.9.9.1)
 
-![image](https://github.com/user-attachments/assets/4d9a344b-4825-4f34-9e11-04e81d4ff7e7)
+<img width="1680" height="794" alt="image" src="https://github.com/user-attachments/assets/f2f1af11-27e4-4f35-b70b-62dda3a423c9" />
 
 Organizicate is a smart, user-friendly file and folder organizer for Windows. It helps you keep your digital workspace tidy by automatically sorting files and folders into customizable categories based on their extensions. With a modern interface, drag-and-drop support, undo, system tray minimization, and theme switching, Organizicate makes digital organization effortless.
 
@@ -8,17 +8,46 @@ Organizicate is a smart, user-friendly file and folder organizer for Windows. It
 
 ![image](https://github.com/user-attachments/assets/d9723b54-210a-4fff-b095-80c02d274f0a)
 
-## ✨ Features
+# 🗂️ Organizicate – Key Features
 
-- **Automatic Organization:** Sort files and folders into categories by extension.
-- **Custom Categories:** Add, edit, delete, import, and export your own categories.
-- **Drag & Drop:** Quickly drop files or folders into the app to set the path.
-- **Undo:** Revert the last organization action.
-- **System Tray:** Minimize to tray and restore easily.
-- **Theme Support:** Switch between multiple light and dark themes.
-- **Recent Folders:** Quick access to recently used folders.
-- **No Recursion:** Only top-level files/folders are moved (no subfolder recursion).
-- **Modern UI:** Built with [ttkbootstrap](https://ttkbootstrap.readthedocs.io/) for a clean, modern look.
+- ⚙️ **Automatic Organization**  
+  Sort files and folders into smart categories based on file extensions.
+
+- ⚡ **Hyper-Speed Organization**  
+  Instantly sort files and folders into smart categories based on file extensions — no lag, even in large directories.
+
+- 🪶 **Super Lightweight (only 18 MB!)**  
+  Lightning-fast performance with a tiny footprint. Runs smoothly even on low-spec machines.
+
+- 🧩 **Custom Categories**  
+  Add, edit, delete, import, and export your own categories with support for descriptions and conflict detection.
+
+- 🧠 **Smart Exclusions Management**  
+  Exclude specific files or folders from operations using a powerful exclusion system.
+
+- ♻️ **Undo**  
+  Revert your last organization action (supports multiple levels of undo).
+
+- 🧳 **System Tray Integration**  
+  Minimize the app to the tray and restore it later using a tray icon menu.
+
+- 🎨 **Theme Support**  
+  Easily switch between multiple modern light and dark themes (powered by `ttkbootstrap`).
+
+- 📋 **Extension Conflict Detection**  
+  Get notified if a file extension already exists in another category while editing.
+
+- 🪄 **Combined Logging**  
+  Recent actions log is now merged into the main log file for clarity and better debugging.
+
+- 🚫 **No Subfolder Recursion**  
+  Only top-level files and folders are organized — subdirectories are left untouched.
+
+- 🧼 **Modern UI**  
+  Clean, intuitive design built with [ttkbootstrap](https://ttkbootstrap.readthedocs.io/) for a better user experience.
+
+- ❔ **Tooltips and Accessibility**  
+  Helpful tooltips and improved keyboard navigation make the app more user-friendly.
 
 ---
 
