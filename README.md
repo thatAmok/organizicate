@@ -1,114 +1,113 @@
+---
+
 # 🧠 Organizicate (Beta v0.9.9.1)
 
-<img width="1680" height="794" alt="image" src="https://github.com/user-attachments/assets/f2f1af11-27e4-4f35-b70b-62dda3a423c9" />
+<img width="1680" height="794" alt="Organizicate UI preview" src="https://github.com/user-attachments/assets/f2f1af11-27e4-4f35-b70b-62dda3a423c9" />
 
-Organizicate is a smart, user-friendly file and folder organizer for Windows. It helps you tidy up your digital workspace by automatically sorting files and folders into customizable categories — with undo support, drag-and-drop, themes, and more. Designed to be intuitive, fast, and modern.
+**Organizicate** is a fast, smart, and friendly file organizer for Windows.  
+It helps you *clean up messy folders in seconds* by sorting files into neat, customizable categories — with **drag & drop**, **undo history**, **themes**, and more.
 
----
-
-# 🗂️ Key Features
-
-* ⚙️ **Automatic Organization**
-  Organize files and folders into smart, user-defined categories based on their extensions.
-
-* ⚡ **Hyper-Speed Performance**
-  Blazing fast sorting, even for massive folders — near-instant results.
-
-* 🩶 **Lightweight (47 MB!)**
-  Smooth performance on any system.
-
-* 🧩 **Fully Customizable Categories**
-  Create, edit, delete, import, and export categories with conflict detection and descriptions.
-
-* ❌ **Smart Exclusions Logic**
-  Exclude specific files or folders with powerful filtering — right from the UI.
-
-* ♻️ **Multi-Level Undo**
-  Not just one step back — undo all actions with full history support.
-
-* 📊 **Pie Chart Summary**
-  Visual breakdown of files by category after every organization.
-
-* 💼 **4 Powerful Organization Modes**
-
-  * Organize a single folder
-  * Organize all files in a folder
-  * Organize all folders A–Z
-  * Organize a single folder A–Z
-
-* 👳 **System Tray Integration**
-  Minimize to tray with full restore support via right-click menu.
-
-* 🎨 **Theme Switching (15+ Light & Dark Themes!)**
-  Choose your vibe with modern themes (powered by `ttkbootstrap`).
-
-* 📋 **Extension Conflict Alerts**
-  Get notified if an extension is already used in another category.
-
-* 🪄 **Polished UI**
-  Clean layout, improved padding, modern design, and full tooltip support.
-
-* 🅾️ **Help & About Menus**
-  In-app help, welcome screen, and detailed about info with GitHub link.
-
-* ✨ **Other Highlights**
-
-  * Welcome Window
-  * Category toggle (enable/disable)
-  * Show Changes before committing
-  * New app icon
-  * Log improvements (combined logs)
-  * No subfolder recursion (for safety)
+> 🎯 Designed for clarity, speed, and peace of mind.
 
 ---
 
-## 🚀 Getting Started
+## 🗂️ Features at a Glance
 
-### Requirements (for source code use only)
+- ⚙️ **Auto Sort by Extension**  
+  One click organizes files into smart categories.
 
-> To use the full app without setup, download the .zip from GitHub releases.
+- ⚡ **Blazing Fast**  
+  Handles huge folders with near-instant speed.
 
-* Python 3.8+
-* [`ttkbootstrap`](https://pypi.org/project/ttkbootstrap/)
-* [`pystray`](https://pypi.org/project/pystray/) *(optional, tray support)*
-* [`Pillow`](https://pypi.org/project/Pillow/) *(optional, tray icon)*
+- 🧩 **Custom Categories**  
+  Edit, import/export, rename — with extension conflict alerts.
 
-### Installation
+- ♻️ **Full Undo History**  
+  Go back one step, or undo everything.
 
-```sh
+- ❌ **Exclusions You Control**  
+  Skip files or folders with powerful filters.
+
+- 📊 **Pie Chart Report**  
+  See what got sorted — instantly.
+
+- 💼 **4 Sorting Modes**  
+  - One folder  
+  - Everything inside  
+  - Folders A–Z  
+  - Single folder A–Z
+
+- 👳 **System Tray Support**  
+  Minimize & restore from the tray.
+
+- 🎨 **15+ Themes**  
+  Light and dark modes via `ttkbootstrap`.
+
+- 🅾️ **Polished UI**  
+  Modern design, clear layout, tooltips everywhere.
+
+- 📋 **Help, About & Welcome Windows**  
+  Get started faster with in-app guidance.
+
+- 🪄 **Other Goodies**  
+  - Category toggle  
+  - "Show Changes" preview  
+  - New app icon  
+  - Combined logs  
+  - Safe: no subfolder recursion
+
+---
+
+## 🚀 Get Started
+
+### 🔸 Want it fast?
+**Just download the `.zip` from [GitHub Releases](https://github.com/thatAmok/organizicate/releases)** — no setup needed.
+
+---
+
+### 🔧 Developer Setup (Run from source)
+
+#### Requirements:
+- Python 3.8+
+- [`ttkbootstrap`](https://pypi.org/project/ttkbootstrap/)
+- [`pystray`](https://pypi.org/project/pystray/) *(optional for tray)*
+- [`Pillow`](https://pypi.org/project/Pillow/) *(optional for tray icon)*
+
+#### Install & Run:
+```bash
 git clone https://github.com/thatAmok/organizicate.git
 cd organizicate
 pip install ttkbootstrap pystray Pillow tkinterdnd2
 python organizicate.py
-```
+````
 
 ---
 
-## 🛠️ Usage Overview
+## 🛠️ How to Use
 
-1. **Choose Operation Mode**
-2. **Select Folder/File** — drag-and-drop or browse.
-3. **Click "Run Operation"**
-4. **Manage Categories** — edit, toggle, import/export.
-5. **Preview Changes** — optional but recommended.
-6. **Undo** — revert one or all past operations.
-7. **Minimize to Tray** — keep the app running silently.
+1. Choose your **organization mode**
+2. Drag and drop a folder (or file) into the app
+3. Click **"Run Operation"**
+4. Manage categories (add/remove, enable/disable, import/export)
+5. Use **"Show Changes"** to preview
+6. Use **Undo** to roll back actions
+7. Minimize to tray when done
 
 ---
 
-## 📂 Category Types
+## 🧷 Category Types
 
-* **Default Categories**
-  Built-in, preconfigured. Cannot be deleted.
+* 🔒 **Default Categories**
+  Built-in and protected — can’t be deleted.
 
-* **User Categories**
-  Fully customizable. Exportable and sharable.
+* ✏️ **User Categories**
+  Fully editable and sharable with JSON import/export.
 
 ---
 
 ## 📝 License
 
-MIT License — free to use, modify, and distribute.
+MIT License — free to use, modify, and share.
 
 ---
 
@@ -116,32 +115,38 @@ MIT License — free to use, modify, and distribute.
 
 Developed by [@thatAmok](https://github.com/thatAmok)
 
-> ⚠️ Note: [@yourAmok](https://github.com/yourAmok) and [@Hotmountain](https://github.com/Hotmountain) were previous accounts. This is the current one.
+> 🧾 Former aliases: [@yourAmok](https://github.com/yourAmok), [@Hotmountain](https://github.com/Hotmountain)
 
-📧 For bugs, suggestions, or contact: **[newtongigabye@gmail.com](mailto:newtongigabye@gmail.com)**
+📬 Contact: [newtongigabye@gmail.com](mailto:newtongigabye@gmail.com)
 
 ---
 
 ## 🌐 Project Links
 
-* 🔗 [GitHub Repo](https://github.com/thatAmok/organizicate)
-* 📚 [ttkbootstrap Docs](https://ttkbootstrap.readthedocs.io/)
+* 🔗 [GitHub Repository](https://github.com/thatAmok/organizicate)
+* 📚 [ttkbootstrap Documentation](https://ttkbootstrap.readthedocs.io/)
 
 ---
 
-## 💡 Contributing
+## 💡 Want to Help?
 
-Pull requests and ideas are welcome! Open an issue to discuss.
+Pull requests, ideas, and feedback are welcome!
+Open an [issue](https://github.com/thatAmok/organizicate/issues) to get started.
 
 ---
 
-## ⚠️ Disclaimer
+## ⚠️ Beta Disclaimer
 
-**Organizicate is still in beta.** Always back up important files before using.
+**This app is still in beta.**
+Please back up important files before organizing.
 
 ---
 
 ## 💸 100% Free & Open Source
 
-Free forever. Modify, fork, or share — just don’t use it for unethical or malicious purposes.
-Credit is appreciated: [@thatAmok](https://github.com/thatAmok) 💙
+Free forever. No nags. No tracking.
+Fork, remix, or share — just don’t use it for shady stuff.
+
+> 💙 Credit appreciated: [@thatAmok](https://github.com/thatAmok)
+
+---
