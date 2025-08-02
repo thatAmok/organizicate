@@ -124,7 +124,7 @@ Developed by [@thatAmok](https://github.com/thatAmok)
 
 ## 🌐 Project Links
 
-* 🔗 [GitHub Repo](https://github.com/yourAmok/organizicate-beta)
+* 🔗 [GitHub Repo](https://github.com/thatAmok/organizicate)
 * 📚 [ttkbootstrap Docs](https://ttkbootstrap.readthedocs.io/)
 
 ---
