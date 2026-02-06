@@ -290,6 +290,9 @@ class OrganizicateBeta(TkinterDnD.Tk):
             "output_log_font": "Fira Code",
             "output_log_font_size": 10,
             "output_log_max_lines": 500,
+            "dry_run": False,
+            "conflict_mode": "Rename",
+            "include_hidden": True,
         }
         try:
             if os.path.isfile(self.SETTINGS_FILE):
@@ -318,6 +321,9 @@ class OrganizicateBeta(TkinterDnD.Tk):
             "output_log_font": "Fira Code",
             "output_log_font_size": 10,
             "output_log_max_lines": 500,
+            "dry_run": False,
+            "conflict_mode": "Rename",
+            "include_hidden": True,
         }
         try:
             if os.path.isfile(self.SETTINGS_FILE):
@@ -403,7 +409,8 @@ class OrganizicateBeta(TkinterDnD.Tk):
             "2. Enter or browse for a folder or file path.\n"
             "3. Click 'Organize' to start!\n"
             "4. Manage categories on the right to customize file types.\n"
-            "5. Use the Undo button to revert the last move."
+            "5. Use Dry Run to preview changes and set conflict handling.\n"
+            "6. Use the Undo button to revert the last move."
         )
         howto_label = ttk.Label(frame, text=howto, font=("SF Pro Display", 11), justify="left")
         howto_label.pack(anchor="w", pady=(0, 16))
@@ -510,6 +517,33 @@ class OrganizicateBeta(TkinterDnD.Tk):
             self.settings["confirm_quit"] = confirm_quit_var.get()
             self.save_settings()
         settings_menu.add_checkbutton(label="Confirm on Quit", variable=confirm_quit_var, command=toggle_confirm_quit)
+        # Dry run mode
+        dry_run_var = tk.BooleanVar(value=self.settings.get("dry_run", False))
+        def toggle_dry_run():
+            self.settings["dry_run"] = dry_run_var.get()
+            self.save_settings()
+            if hasattr(self, "dry_run_var"):
+                self.dry_run_var.set(dry_run_var.get())
+        settings_menu.add_checkbutton(label="Dry Run (Preview Only)", variable=dry_run_var, command=toggle_dry_run)
+        # Include hidden files/folders
+        include_hidden_var = tk.BooleanVar(value=self.settings.get("include_hidden", True))
+        def toggle_include_hidden():
+            self.settings["include_hidden"] = include_hidden_var.get()
+            self.save_settings()
+            if hasattr(self, "include_hidden_var"):
+                self.include_hidden_var.set(include_hidden_var.get())
+        settings_menu.add_checkbutton(label="Include Hidden Files/Folders", variable=include_hidden_var, command=toggle_include_hidden)
+        # Conflict handling
+        conflict_var = tk.StringVar(value=self.settings.get("conflict_mode", "Rename"))
+        def set_conflict_mode():
+            self.settings["conflict_mode"] = conflict_var.get()
+            self.save_settings()
+            if hasattr(self, "conflict_mode_var"):
+                self.conflict_mode_var.set(conflict_var.get())
+        conflict_menu = tk.Menu(settings_menu, tearoff=0)
+        for label in ("Rename", "Skip", "Overwrite"):
+            conflict_menu.add_radiobutton(label=label, variable=conflict_var, value=label, command=set_conflict_mode)
+        settings_menu.add_cascade(label="On Name Conflict", menu=conflict_menu)
         # Output log font
         settings_menu.add_command(label="Output Log Font...", command=self._show_output_log_font_dialog)
         # Output log max lines
@@ -1048,6 +1082,43 @@ class OrganizicateBeta(TkinterDnD.Tk):
         ToolTip(self.show_changes_btn, "Open the last organized folder or file in Explorer")
         self.show_changes_btn.config(state='disabled')
 
+        # --- Options Section ---
+        options_frame = ttk.Frame(main_frame)
+        options_frame.pack(fill='x', pady=(0, 10))
+        self.dry_run_var = tk.BooleanVar(value=self.settings.get("dry_run", False))
+        dry_run_check = ttk.Checkbutton(
+            options_frame,
+            text="Dry Run (preview only)",
+            variable=self.dry_run_var,
+            command=lambda: self._update_setting("dry_run", self.dry_run_var.get())
+        )
+        dry_run_check.pack(side='left', padx=(0, 12))
+        ToolTip(dry_run_check, "Preview actions without moving or deleting files.")
+        self.include_hidden_var = tk.BooleanVar(value=self.settings.get("include_hidden", True))
+        include_hidden_check = ttk.Checkbutton(
+            options_frame,
+            text="Include hidden items",
+            variable=self.include_hidden_var,
+            command=lambda: self._update_setting("include_hidden", self.include_hidden_var.get())
+        )
+        include_hidden_check.pack(side='left', padx=(0, 12))
+        ToolTip(include_hidden_check, "Include hidden files and folders (dotfiles).")
+        ttk.Label(options_frame, text="On name conflict:").pack(side='left', padx=(0, 6))
+        self.conflict_mode_var = tk.StringVar(value=self.settings.get("conflict_mode", "Rename"))
+        conflict_combo = ttk.Combobox(
+            options_frame,
+            values=["Rename", "Skip", "Overwrite"],
+            textvariable=self.conflict_mode_var,
+            state="readonly",
+            width=12
+        )
+        conflict_combo.pack(side='left')
+        conflict_combo.bind(
+            "<<ComboboxSelected>>",
+            lambda event: self._update_setting("conflict_mode", self.conflict_mode_var.get())
+        )
+        ToolTip(conflict_combo, "Choose what happens when a destination file/folder already exists.")
+
         # --- Output Log Section + Pie Chart ---
         self.apply_custom_label_styles()
         output_frame = ttk.LabelFrame(main_frame, text="Output Log", padding=(11, 8))
@@ -1185,6 +1256,18 @@ class OrganizicateBeta(TkinterDnD.Tk):
         # Always add the fake entry at the bottom
         self.category_listbox.insert('end', "Select category then double-click name.")
         print(f"Refreshed listbox with {count_inserted} categories (filtered: {filter_text}), plus fake entry at bottom.")
+
+    def _update_setting(self, key, value):
+        self.settings[key] = value
+        self.save_settings()
+
+    def _set_last_organized_path(self, path):
+        self.last_organized_path = path
+        if hasattr(self, 'show_changes_btn'):
+            if self.settings.get("dry_run", False):
+                self.show_changes_btn.config(state='disabled')
+            else:
+                self.show_changes_btn.config(state='normal')
 
     def parse_extensions(self, ext_string):
         # Split by comma and clean
@@ -1420,18 +1503,22 @@ class OrganizicateBeta(TkinterDnD.Tk):
         self.output_text.config(state='disabled')
         self.log_to_file(message)
 
-    def log_summary(self, count_moved):
+    def log_summary(self, count_moved, dry_run=False, use_queue=False):
         """Log a summary of moved files/folders by category and update pie chart."""
         if not count_moved:
-            self.log("No files or folders were moved.")
+            self._log_action(
+                "No files or folders were moved." if not dry_run else "Dry run complete. No files or folders would be moved.",
+                use_queue=use_queue
+            )
             return
-        summary = "Summary of moved items:\n"
+        summary = "Dry run summary (no changes made):\n" if dry_run else "Summary of moved items:\n"
         for cat, count in sorted(count_moved.items()):
             summary += f"  {cat}: {count}\n"
         summary = summary.rstrip("\n")
-        self.log(summary)
-        # Update pie chart
-        self._update_pie_chart(count_moved)
+        self._log_action(summary, use_queue=use_queue)
+        # Update pie chart only for actual moves
+        if not dry_run:
+            self._update_pie_chart(count_moved)
         return summary
 
     def run_operation(self):
@@ -1443,6 +1530,9 @@ class OrganizicateBeta(TkinterDnD.Tk):
         self.status_var.set("Running operation...")
         self.log(f"Operation: {self.operation_var.get()}")
         self.log(f"Target Path: {path}")
+        self.log(f"Dry Run: {'On' if self.settings.get('dry_run', False) else 'Off'}")
+        self.log(f"Conflict Mode: {self.settings.get('conflict_mode', 'Rename')}")
+        self.log(f"Include Hidden: {'Yes' if self.settings.get('include_hidden', True) else 'No'}")
 
         # Run in background thread to avoid freezing UI
         if self.operation_thread and self.operation_thread.is_alive():
@@ -1483,17 +1573,24 @@ class OrganizicateBeta(TkinterDnD.Tk):
             self.action_queue.put(("status", "Operation completed."))
             return
         try:
-            shutil.move(folder_path, dst)
-            # Add to undo stack
-            if hasattr(self, 'undo_stack'):
-                self.undo_stack.append([(dst, folder_path)])
-                if hasattr(self, 'undo_btn'):
-                    self.undo_btn.config(state='normal')
-            self.action_queue.put(("log", f"Moved folder '{os.path.basename(folder_path)}' to 'Folders'."))
+            undo_ops = []
+            resolved, action = self._move_item(
+                folder_path,
+                dst,
+                f"folder '{os.path.basename(folder_path)}'",
+                undo_ops=undo_ops,
+                use_queue=True
+            )
+            if resolved and not self.settings.get("dry_run", False):
+                action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                self.action_queue.put(("log", f"Moved folder '{os.path.basename(folder_path)}' to 'Folders'{action_note}."))
+                if undo_ops and hasattr(self, 'undo_stack'):
+                    self.undo_stack.append(undo_ops)
+                    if hasattr(self, 'undo_btn'):
+                        self.undo_btn.config(state='normal')
             self.action_queue.put(("status", "Operation completed."))
-            self.last_organized_path = dst
-            if hasattr(self, 'show_changes_btn'):
-                self.show_changes_btn.config(state='normal')
+            if resolved:
+                self._set_last_organized_path(resolved)
         except Exception as e:
             self.action_queue.put(("log", f"Failed to move folder: {e}"))
             self.action_queue.put(("status", "Error occurred."))
@@ -1519,17 +1616,24 @@ class OrganizicateBeta(TkinterDnD.Tk):
             self.action_queue.put(("status", "Operation completed."))
             return
         try:
-            shutil.move(folder_path, dst)
-            # Add to undo stack
-            if hasattr(self, 'undo_stack'):
-                self.undo_stack.append([(dst, folder_path)])
-                if hasattr(self, 'undo_btn'):
-                    self.undo_btn.config(state='normal')
-            self.action_queue.put(("log", f"Moved folder '{folder_name}' to '{first_char}/'."))
+            undo_ops = []
+            resolved, action = self._move_item(
+                folder_path,
+                dst,
+                f"folder '{folder_name}'",
+                undo_ops=undo_ops,
+                use_queue=True
+            )
+            if resolved and not self.settings.get("dry_run", False):
+                action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                self.action_queue.put(("log", f"Moved folder '{folder_name}' to '{first_char}/'{action_note}."))
+                if undo_ops and hasattr(self, 'undo_stack'):
+                    self.undo_stack.append(undo_ops)
+                    if hasattr(self, 'undo_btn'):
+                        self.undo_btn.config(state='normal')
             self.action_queue.put(("status", "Operation completed."))
-            self.last_organized_path = dst
-            if hasattr(self, 'show_changes_btn'):
-                self.show_changes_btn.config(state='normal')
+            if resolved:
+                self._set_last_organized_path(resolved)
         except Exception as e:
             self.action_queue.put(("log", f"Failed to move folder: {e}"))
             self.action_queue.put(("status", "Error occurred."))
@@ -1557,9 +1661,7 @@ class OrganizicateBeta(TkinterDnD.Tk):
                     self.undo_btn.config(state='normal')
         self.action_queue.put(("log", "Organized everything in the folder."))
         self.action_queue.put(("status", "Operation completed."))
-        self.last_organized_path = folder_path
-        if hasattr(self, 'show_changes_btn'):
-            self.show_changes_btn.config(state='normal')
+        self._set_last_organized_path(folder_path)
 
     def organize_folders_az(self, folder_path):
         """Organize all folders in a folder (A-Z), skipping folders named after any category.
@@ -1575,7 +1677,10 @@ class OrganizicateBeta(TkinterDnD.Tk):
             if isinstance(subcats, dict):
                 category_names.update(subcats.keys())
         # List all folders in the directory
-        all_folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+        all_folders = [
+            f for f in os.listdir(folder_path)
+            if os.path.isdir(os.path.join(folder_path, f)) and not self._should_skip_hidden(f)
+        ]
         # Filter out folders named after any category (case-insensitive)
         filtered_folders = [f for f in all_folders if f.lower() not in {c.lower() for c in category_names}]
         if not filtered_folders:
@@ -1584,7 +1689,7 @@ class OrganizicateBeta(TkinterDnD.Tk):
             return
         # Sort alphabetically
         filtered_folders.sort(key=lambda x: x.lower())
-        count_moved = 0
+        count_moved = defaultdict(int)
         undo_ops = []
         for folder in filtered_folders:
             src = os.path.join(folder_path, folder)
@@ -1599,10 +1704,18 @@ class OrganizicateBeta(TkinterDnD.Tk):
             if os.path.abspath(src) == os.path.abspath(dst):
                 continue
             try:
-                shutil.move(src, dst)
-                count_moved += 1
-                undo_ops.append((src, dst))
-                self.action_queue.put(("log", f"Moved folder '{folder}' to '{first_char}/'."))
+                resolved, action = self._move_item(
+                    src,
+                    dst,
+                    f"folder '{folder}'",
+                    undo_ops=undo_ops,
+                    count_moved=count_moved,
+                    count_key=f"{first_char}/",
+                    use_queue=True
+                )
+                if resolved and not self.settings.get("dry_run", False):
+                    action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                    self.action_queue.put(("log", f"Moved folder '{folder}' to '{first_char}/'{action_note}."))
             except Exception as e:
                 self.action_queue.put(("log", f"Failed to move '{folder}': {e}"))
         if undo_ops:
@@ -1610,11 +1723,9 @@ class OrganizicateBeta(TkinterDnD.Tk):
             # Always enable the Undo button if there are undoable operations
             if hasattr(self, 'undo_btn'):
                 self.undo_btn.config(state='normal')
-        self.action_queue.put(("log", f"Moved {count_moved} folders to A-Z folders."))
+        self.log_summary(count_moved, dry_run=self.settings.get("dry_run", False), use_queue=True)
         self.action_queue.put(("status", "Operation completed."))
-        self.last_organized_path = folder_path
-        if hasattr(self, 'show_changes_btn'):
-            self.show_changes_btn.config(state='normal')
+        self._set_last_organized_path(folder_path)
 
     def _run_operation_thread(self, op, path):
         try:
@@ -1644,6 +1755,62 @@ class OrganizicateBeta(TkinterDnD.Tk):
         except queue.Empty:
             pass
         self.after(100, self.process_action_queue)
+
+    def _log_action(self, message, use_queue=False):
+        if use_queue:
+            self.action_queue.put(("log", message))
+        else:
+            self.log(message)
+
+    def _should_skip_hidden(self, name):
+        return (not self.settings.get("include_hidden", True)) and name.startswith(".")
+
+    def _resolve_conflict_path(self, dst_path):
+        if not os.path.exists(dst_path):
+            return dst_path, "move"
+        mode = self.settings.get("conflict_mode", "Rename")
+        if mode == "Skip":
+            return None, "skip"
+        if mode == "Overwrite":
+            return dst_path, "overwrite"
+        base, ext = os.path.splitext(dst_path)
+        counter = 1
+        while True:
+            candidate = f"{base} ({counter}){ext}"
+            if not os.path.exists(candidate):
+                return candidate, "rename"
+            counter += 1
+
+    def _remove_existing_path(self, path):
+        if os.path.isdir(path) and not os.path.islink(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+
+    def _move_item(self, src, dst, label, undo_ops=None, count_moved=None, count_key=None, use_queue=False):
+        resolved, action = self._resolve_conflict_path(dst)
+        if resolved is None:
+            self._log_action(f"{label} skipped (destination exists).", use_queue=use_queue)
+            return None, action
+        dry_run = self.settings.get("dry_run", False)
+        action_note = ""
+        if action == "rename":
+            action_note = f" (renamed to '{os.path.basename(resolved)}')"
+        elif action == "overwrite":
+            action_note = " (overwriting existing item)"
+        if dry_run:
+            self._log_action(f"[Dry Run] Would move {label} to '{resolved}'{action_note}.", use_queue=use_queue)
+            if count_moved is not None and count_key is not None:
+                count_moved[count_key] += 1
+            return resolved, action
+        if action == "overwrite" and os.path.exists(resolved):
+            self._remove_existing_path(resolved)
+        shutil.move(src, resolved)
+        if undo_ops is not None:
+            undo_ops.append((src, resolved))
+        if count_moved is not None and count_key is not None:
+            count_moved[count_key] += 1
+        return resolved, action
 
     # === Organization methods ===
 
@@ -1679,7 +1846,10 @@ class OrganizicateBeta(TkinterDnD.Tk):
     def organize_single_folder(self, folder_path):
         if not os.path.isdir(folder_path):
             raise ValueError(f"\n'{folder_path}' is not a valid folder path.")
-        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+        files = [
+            f for f in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, f)) and not self._should_skip_hidden(f)
+        ]
         if not files:
             self.log("\nNo files found in the folder.")
             return
@@ -1703,10 +1873,17 @@ class OrganizicateBeta(TkinterDnD.Tk):
             dest_folder = self.ensure_folder(folder_path, main_cat, subcat)
             dst = os.path.join(dest_folder, file_name)
             try:
-                shutil.move(file_path, dst)
-                self.log(f"\nMoved file '{file_name}' to folder '{main_cat}'{f'/{subcat}' if subcat else ''}.")
-                count_moved[f"{main_cat}{f'/{subcat}' if subcat else ''}"] += 1
-                undo_ops.append((file_path, dst))
+                resolved, action = self._move_item(
+                    file_path,
+                    dst,
+                    f"file '{file_name}'",
+                    undo_ops=undo_ops,
+                    count_moved=count_moved,
+                    count_key=f"{main_cat}{f'/{subcat}' if subcat else ''}"
+                )
+                if resolved and not self.settings.get("dry_run", False):
+                    action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                    self.log(f"\nMoved file '{file_name}' to folder '{main_cat}'{f'/{subcat}' if subcat else ''}{action_note}.")
             except PermissionError as e:
                 self.log(f"\nPermission denied: '{file_name}'. Skipped. ({e})")
             except Exception as e:
@@ -1714,10 +1891,8 @@ class OrganizicateBeta(TkinterDnD.Tk):
         if undo_ops:
             self.undo_stack.append(undo_ops)
             self.undo_btn.config(state='normal')
-        self.log_summary(count_moved)
-        self.last_organized_path = folder_path
-        if hasattr(self, 'show_changes_btn'):
-            self.show_changes_btn.config(state='normal')
+        self.log_summary(count_moved, dry_run=self.settings.get("dry_run", False))
+        self._set_last_organized_path(folder_path)
 
     def organize_single_file(self, file_path):
         """Organize a single file by moving it into its category folder."""
@@ -1731,9 +1906,7 @@ class OrganizicateBeta(TkinterDnD.Tk):
             self.log(f"\nFile '{file_name}' is already in the correct folder.")
             # Still add the parent folder to recent folders for consistency
             self.add_recent_folder(folder_path)
-            self.last_organized_path = dst
-            if hasattr(self, 'show_changes_btn'):
-                self.show_changes_btn.config(state='normal')
+            self._set_last_organized_path(dst)
             return
         if self.is_category_disabled(true_cat):
             self.log(f"\nCategory '{true_cat}' is disabled. '{file_name}' skipped.")
@@ -1742,28 +1915,38 @@ class OrganizicateBeta(TkinterDnD.Tk):
             self.log(f"\nCategory 'Other' is disabled. '{file_name}' skipped.")
             return
         try:
-            shutil.move(file_path, dst)
-            self.log(f"\nMoved file '{file_name}' to folder '{main_cat}'{f'/{subcat}' if subcat else ''}.")
-            self.undo_stack.append([(file_path, dst)])
-            self.undo_btn.config(state='normal')
+            undo_ops = []
+            resolved, action = self._move_item(
+                file_path,
+                dst,
+                f"file '{file_name}'",
+                undo_ops=undo_ops,
+                count_moved=None,
+                count_key=None
+            )
+            if resolved and not self.settings.get("dry_run", False):
+                action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                self.log(f"\nMoved file '{file_name}' to folder '{main_cat}'{f'/{subcat}' if subcat else ''}{action_note}.")
+                if undo_ops:
+                    self.undo_stack.append(undo_ops)
+                    self.undo_btn.config(state='normal')
             # Add the parent folder to recent folders
             self.add_recent_folder(folder_path)
-            self.last_organized_path = dst
-            if hasattr(self, 'show_changes_btn'):
-                self.show_changes_btn.config(state='normal')
+            if resolved:
+                self._set_last_organized_path(resolved)
         except PermissionError as e:
             self.log(f"\nPermission denied: '{file_name}'. Skipped. ({e})")
         except Exception as e:
             self.log(f"\nFailed to move '{file_name}': {e}")
-            self.last_organized_path = dst
-            if hasattr(self, 'show_changes_btn'):
-                self.show_changes_btn.config(state='normal')
+            if self.settings.get("dry_run", False):
+                return
+            self._set_last_organized_path(dst)
 
 
     def organize_all_folders_in_folder(self, folder_path):
         if not os.path.isdir(folder_path):
             raise ValueError(f"'{folder_path}' is not a valid folder path.")
-        count_moved = 0
+        count_moved = defaultdict(int)
         undo_ops = []
         # Get all category names (including subcategories)
         category_names = set(self.file_categories.keys())
@@ -1775,6 +1958,8 @@ class OrganizicateBeta(TkinterDnD.Tk):
         if not os.path.exists(folders_folder):
             os.makedirs(folders_folder)
         for item in os.listdir(folder_path):
+            if self._should_skip_hidden(item):
+                continue
             item_path = os.path.join(folder_path, item)
             if self._is_excluded(item_path):
                 self.action_queue.put(("log", f"Excluded folder '{item}'. Skipped."))
@@ -1801,10 +1986,18 @@ class OrganizicateBeta(TkinterDnD.Tk):
                 except ValueError:
                     pass
                 try:
-                    shutil.move(item_path, dst)
-                    self.action_queue.put(("log", f"Moved folder '{item}' to 'Folders'."))
-                    count_moved += 1
-                    undo_ops.append((item_path, dst))
+                    resolved, action = self._move_item(
+                        item_path,
+                        dst,
+                        f"folder '{item}'",
+                        undo_ops=undo_ops,
+                        count_moved=count_moved,
+                        count_key="Folders",
+                        use_queue=True
+                    )
+                    if resolved and not self.settings.get("dry_run", False):
+                        action_note = f" (renamed to '{os.path.basename(resolved)}')" if action == "rename" else ""
+                        self.action_queue.put(("log", f"Moved folder '{item}' to 'Folders'{action_note}."))
                 except PermissionError as e:
                     self.action_queue.put(("log", f"Permission denied: '{item}'. Skipped. ({e})"))
                 except Exception as e:
@@ -1812,10 +2005,8 @@ class OrganizicateBeta(TkinterDnD.Tk):
         if undo_ops:
             self.undo_stack.append(undo_ops)
             self.undo_btn.config(state='normal')
-        self.action_queue.put(("log", f"Moved {count_moved} folders to 'Folders'."))
-        self.last_organized_path = folder_path
-        if hasattr(self, 'show_changes_btn'):
-            self.show_changes_btn.config(state='normal')
+        self.log_summary(count_moved, dry_run=self.settings.get("dry_run", False), use_queue=True)
+        self._set_last_organized_path(folder_path)
     def _is_excluded(self, path):
         # Exclude if the absolute path or its normalized version is in the set
         abspath = os.path.abspath(path)
